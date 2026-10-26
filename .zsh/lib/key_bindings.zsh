@@ -3,7 +3,7 @@
 bindkey -e
 bindkey '\ew' kill-region
 bindkey -s '\el' "ls\n"
-bindkey -s '\e.' "..\n"
+bindkey -s '\e.' "cd ..\n"
 bindkey '^r' history-incremental-search-backward
 bindkey "^[[5~" up-line-or-history
 bindkey "^[[6~" down-line-or-history
@@ -30,22 +30,3 @@ bindkey '^?' backward-delete-char
 bindkey "^[[3~" delete-char
 bindkey "^[3;5~" delete-char
 bindkey "\e[3~" delete-char
-
-# consider emacs keybindings:
-
-#bindkey -e  ## emacs key bindings
-#
-#bindkey '^[[A' up-line-or-search
-#bindkey '^[[B' down-line-or-search
-#bindkey '^[^[[C' emacs-forward-word
-#bindkey '^[^[[D' emacs-backward-word
-#
-#bindkey -s '^X^Z' '%-^M'
-#bindkey '^[e' expand-cmd-path
-#bindkey '^[^I' reverse-menu-complete
-#bindkey '^X^N' accept-and-infer-next-history
-#bindkey '^W' kill-region
-#bindkey '^I' complete-word
-## Fix weird sequence that rxvt produces
-#bindkey -s '^[[Z' '\t'
-#
