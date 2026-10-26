@@ -8,7 +8,7 @@ set nowrap
 set expandtab tabstop=2 softtabstop=2 shiftwidth=2
 set backspace=indent,eol,start
 set incsearch hlsearch
-set list listchars=tab:»·,trail:·
+set list listchars=tab:>-,trail:.
 set laststatus=2
 set statusline=%f\ %m%r%h%w%=%y\ %l:%c\ %p%%
 set nofoldenable
