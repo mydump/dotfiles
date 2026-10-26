@@ -1,14 +1,16 @@
 #!/bin/sh
 set -eu
-install_packages=no
-change_shell=no
+install_packages=yes
+change_shell=yes
 replace=no
 for arg do
   case "$arg" in
     --install-packages) install_packages=yes ;;
+    --no-install-packages) install_packages=no ;;
+    --no-change-shell) change_shell=no ;;
     --replace) replace=yes ;;
     --change-shell) change_shell=yes ;;
-    *) echo "Usage: $0 [--install-packages] [--change-shell] [--replace]" >&2; exit 2 ;;
+    *) echo "Usage: $0 [--replace] [--no-install-packages] [--no-change-shell]" >&2; exit 2 ;;
   esac
 done
 repo=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
@@ -54,7 +56,7 @@ if [ -n "$missing" ] && [ "$install_packages" = yes ]; then
 fi
 for tool in zsh vim; do
   if ! command -v "$tool" >/dev/null 2>&1; then
-    echo "Missing: $tool. Install it manually or use --install-packages." >&2
+    echo "Missing: $tool. Install it manually and rerun the installer." >&2
     exit 1
   fi
 done
@@ -88,12 +90,28 @@ LEGACY_ZLOGIN
 fi
 if [ "$change_shell" = yes ]; then
   zsh_path=$(command -v zsh)
-  if [ "${SHELL:-}" != "$zsh_path" ]; then
+  account=$(id -un)
+  # Read the account database: $SHELL can still contain the old login shell.
+  case $(uname -s) in
+    Darwin) current_shell=$(dscl . -read "/Users/$account" UserShell | awk '{print $2}') ;;
+    Linux) current_shell=$(getent passwd "$account" | awk -F: '{print $7}') ;;
+    FreeBSD) current_shell=$(pw usershow "$account" | awk -F: '{print $10}') ;;
+    *) echo 'Cannot determine login shell on this platform.' >&2; exit 1 ;;
+  esac
+  if [ -z "$current_shell" ]; then
+    echo "Cannot read login shell for $account." >&2; exit 1
+  fi
+  if [ "$current_shell" != "$zsh_path" ]; then
     if ! grep -Fx "$zsh_path" /etc/shells >/dev/null 2>&1; then
-      echo "$zsh_path is not listed in /etc/shells. Ask your administrator to add it." >&2
-      exit 1
+      echo "Registering $zsh_path in /etc/shells."
+      if [ "$(id -u)" -eq 0 ]; then
+        printf '%s\n' "$zsh_path" >> /etc/shells
+      else
+        printf '%s\n' "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+      fi
     fi
-    chsh -s "$zsh_path"
+    chsh -s "$zsh_path" "$account"
+    echo "Login shell changed to Zsh for $account."
   fi
 fi
-echo 'Dotfiles installed. Open a new terminal; after a shell change, log in again.'
+echo 'Dotfiles installed. Open a new terminal; after a shell change, log out and log in again.'

@@ -4,8 +4,10 @@ Small Zsh and Vim configuration for Linux, macOS and FreeBSD.
 
 ## Installation
 
-Prerequisites: Git to clone the repository, Zsh and Vim. Keep the cloned directory:
-the installation creates symbolic links to it.
+Git is needed to clone the repository. The installer checks for Zsh and Vim,
+installs missing programs using an available supported package manager, and sets
+Zsh as the executing user's login shell. Keep the cloned directory: the
+installation creates symbolic links to it.
 
 ```sh
 git clone https://github.com/mydump/dotfiles.git "$HOME/dotfiles"
@@ -15,15 +17,19 @@ cd "$HOME/dotfiles"
 
 Optional flags (also usable together):
 
-- `--install-packages`: install missing Zsh/Vim via apt-get on Debian-based Linux,
-  Homebrew on macOS, or pkg on FreeBSD. The package manager must already exist.
-  Package installation may ask for administrator authentication and confirmation.
-  Other distributions: install the missing programs with your own package manager.
+- `--no-install-packages`: only check for Zsh/Vim; do not install missing programs.
+- `--no-change-shell`: keep the existing login shell (for restricted hosting).
+
+By default, missing Zsh/Vim packages are installed via apt-get on Debian-based
+Linux, Homebrew on macOS, or pkg on FreeBSD. The package manager must already
+exist. Other distributions require manual package installation. Authentication
+and package confirmation may be required. Zsh is added to `/etc/shells` if needed.
+The previous `--install-packages` and `--change-shell` flags remain accepted.
+
 - `--replace`: delete conflicting `.zsh`, `.zshrc`, `.vim`, `.vimrc` files or
   directories and replace them with links. No backups. Also remove `.gvimrc` and
   `.tmux.conf`; remove `.zlogin` only if it matches the original repository version.
   Custom `.zlogin` files are kept with a notice. Installed programs are not removed.
-- `--change-shell`: change only the current user's login shell to Zsh.
 
 Fresh users are the intended use case. Without `--replace`, installation stops on existing conflicting files.
 With `--replace`, those files are deleted without backups. Running it again keeps correct links.
@@ -62,8 +68,10 @@ git pull --ff-only
 ./install.sh --replace
 ```
 
-If Git reports local changes, stop and review them before proceeding. Do not run
-this installer with sudo; package installation requests privileges separately.
+If Git reports local changes, stop and review them before proceeding. Run as the user you want to configure; administrative steps request privileges
+separately. To configure root independently, enter `sudo -i` (or `su -`), clone
+this repository into root's home and run `./install.sh` there. This also changes
+root's login shell to Zsh. Exit and start a new root login session afterward.
 After migration, `git pull --ff-only` and a new terminal normally suffice.
 
 Use `git pull --ff-only` inside the repository to update. To remove, delete only the four
